@@ -34,7 +34,7 @@ class Battery < Widget
 	def to_s
 		refresh_info
 
-		bat_perc = @charge_now/@charge_full*100
+		bat_perc = @charge_now.to_f/@charge_full*100
 		bat_full_num = (@BAT_SIZE * bat_perc / 100).to_i
 
 		"^i(#{ICON_BASE}/bat_empty_01.xbm)^fg(" << ac_status_color << ")" << " (ac)^fg()" <<

@@ -1,0 +1,10 @@
+dzen-environment
+
+This is the attempt to create a ruby-written dzen-based info-environment for the linux-desktop.
+
+The source at this stage is a result of a 5 hour session of messing around. ;-) So it's really not to use. If you decide otherwise despite my recommendation, the whole stuff can be used as follows:
+
+$ ./statusbar.rb | dzen2
+$ ./wlan_networkmanager.rb
+
+Let's see how far it goes!
