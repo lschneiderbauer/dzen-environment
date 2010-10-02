@@ -7,4 +7,11 @@ The source at this stage is a result of a 5 hour session of messing around. ;-) 
 $ ./statusbar.rb | dzen2
 $ ./wlan_networkmanager.rb
 
+Requirements:
+- >= ruby 1.8.7 (perhaps lower version)
+- dzen2 + standard gadgets
+- mpc (an mpd client)
+- ...
+(TODO: complete this list)
+
 Let's see how far it goes!
