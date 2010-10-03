@@ -1,97 +1,109 @@
 #!/usr/bin/ruby
 
+require 'dbus'
+
 ICON_BASE="/home/void/Pictures/icons"
+NM_DBUS_SERVICE="org.freedesktop.NetworkManager"
 INTERVAL=2	# in seconds
 
 class Ap
 	include Comparable
 
-	attr_accessor :active, :hwaddr, :ssid, :wpa, :strength
+	attr_reader :properties
 
-	def initialize(active, hwaddr, ssid)
-		@active = active
-		@hwaddr = hwaddr
-		@ssid = ssid
+	def initialize(dbus, object_path)
+		ap_obj = dbus.service(NM_DBUS_SERVICE) \
+			.object object_path
+		ap_obj.introspect
 
-		# get additional info
-		@strength=`cnetworkmanager --ap-info=#{@hwaddr} | grep Strength`.split('|')[1].strip
-		@wpa=(`cnetworkmanager --ap-info=#{@hwaddr} | grep WpaFlags`.split('|')[1].strip!="")
-
-	end
-
-	def self.parse(str)
-		ar = str.split('|').each {|split| split.strip!}
-
-		self.new(ar[0], ar[1], ar[2])
+		ap_if = ap_obj["org.freedesktop.NetworkManager.AccessPoint"]
+		prop_if = ap_obj["org.freedesktop.DBus.Properties"]
+		
+		@properties = prop_if.GetAll("")[0]
+		
+		# watch for updates
+		ap_if.on_signal(dbus, "PropertiesChanged") do |u|
+			@properties.merge! u
+		end
 	end
 
 	def <=>(another)
-		self.active <=> another.active &&
-		self.hwaddr <=> another.hwaddr &&
-		self.ssid <=> another.ssid &&
-		self.strength <=> another.strength &&
-		self.wpa <=> another.wpa
+		self.properties <=> self.properties
 	end
 
 end
 
 class ApManager
-	attr_accessor :to_repaint, :ap_list
+	attr_reader :ap_list, :properties
 	
-	def initialize
-		@ap_list = []
-		refresh
-		@to_repaint = true
-	end
+	def initialize(dbus)
+		@ap_list = {}
 
-	def refresh
-		@to_repaint = false
+		# initialize AP-list
+		wlan_obj = dbus.service(NM_DBUS_SERVICE) \
+			.object "/org/freedesktop/NetworkManager/Devices/1"
+		wlan_obj.introspect
+		wlan_if = wlan_obj["org.freedesktop.NetworkManager.Device.Wireless"]
+		prop_if = wlan_obj["org.freedesktop.DBus.Properties"]
 
-		tmp_ap_list = []
-		cnet_out = `cnetworkmanager -a`
-		cnet_out.each_line do |line|
-			(tmp_ap_list<< Ap.parse(line)) if (line[0,1]=='*' || line[0,1]==' ')
+		wlan_if.GetAccessPoints[0].each do |object_path|
+			@ap_list[object_path.to_sym] = Ap.new(dbus, object_path)
 		end
 
-		@to_repaint = true if @ap_list != tmp_ap_list
-		@ap_list = tmp_ap_list
+		@properties = prop_if.GetAll("")[0]
+
+		# watch for ap-list updates
+		wlan_if.on_signal(dbus, "AccessPointAdded") do |object_path|
+			@ap_list[object_path.to_sym] = Ap.new(dbus, object_path)
+		end
+
+		wlan_if.on_signal(dbus, "AccessPointRemoved") do |object_path|
+			@ap_list.delete object_path.to_sym
+		end
+
+		wlan_if.on_signal(dbus, "PropertiesChanged") do |u|
+			@properties.merge! u
+		end
 	end
 
 end
 
 
-man = ApManager.new
+dbus = DBus::SystemBus.instance
+man = ApManager.new dbus
 pid = 0
+
+main = DBus::Main.new
+main << dbus
 
 loop do
 
-	if man.to_repaint
 
 		width = 0
 		str = "^i(#{ICON_BASE}/wifi_02.xbm)\n"
-		man.ap_list.each do |ap|
+		man.ap_list.each do |object_path, ap|
 			
 			# active ?
-			if ap.active
+			if object_path = man.properties["ActiveAccessPoint"]
 				color = "" ; color = "lightblue"
 				str << "^i(#{ICON_BASE}/wifi_01.xbm) " 
 			end
 
 			# wpa ?
-			if ap.wpa
+			if ap.properties["WpaFlags"] != ""
 				str << "^i(#{ICON_BASE}/ac.xbm) "
 			end
 
 			# default-info
 			str << "^fg(#{color})" <<
-				ap.hwaddr << " :: " <<
-				ap.ssid << "^fg() "
+				ap.properties["HwAddress"] << " :: " <<
+				ap.properties["Ssid"].to_s << "^fg() "
 
 			# signal strength
-			str << `echo #{ap.strength} | gdbar -fg 'lightblue' -bg '#494b4f' -h 7 -w 30`.chomp
+			str << `echo #{ap.properties["Strength"]} | gdbar -fg 'lightblue' -bg '#494b4f' -h 7 -w 30`.chomp
 			str << "   \n"
 		
-			tmp_width = (ap.hwaddr.size + ap.ssid.size + 15) * 7.5
+			tmp_width = (ap.properties["HwAddress"].size + ap.properties["Ssid"].to_s.size + 15) * 7.5
 			width = tmp_width if tmp_width > width
 		end
 		str.chomp!
@@ -100,8 +112,5 @@ loop do
 		Process.kill("SIGTERM",pid) if pid != 0
 		pid = fork {`echo "#{str}" | dzen2 -tw 20 -x 1380 -sa r -w #{width} -l #{man.ap_list.size+1} -p`}
 	
-	end
-	man.refresh
-
 	sleep INTERVAL	
 end
