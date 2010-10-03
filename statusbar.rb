@@ -131,7 +131,7 @@ class Mpd < Widget
 			@not_av_counter = 0
 		end
 
-		"^i(#{ICON_BASE}/note.xbm) " << str.chomp!.ljust(50)
+		"^i(#{ICON_BASE}/note.xbm) " << str.chomp.ljust(50)
 	end
 
 	def refresh_info
