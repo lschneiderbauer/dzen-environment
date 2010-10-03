@@ -1,17 +1,33 @@
-dzen-environment
+= dzen-environment
 
 This is the attempt to create a ruby-written dzen-based info-environment for the linux-desktop.
 
-The source at this stage is a result of a 5 hour session of messing around. ;-) So it's really not to use. If you decide otherwise despite my recommendation, the whole stuff can be used as follows:
+There are two separate components at the moment:
 
+# Statusbar
 $ ./statusbar.rb | dzen2
+
+# NetworkManager-WLan Applet
 $ ./wlan_networkmanager.rb
 
-Requirements:
+== Dependencies
 - >= ruby 1.8.7 (perhaps lower version)
-- dzen2 + standard gadgets
+- >= ruby-dbus bindings 0.4 (http://github.com/mvidner/ruby-dbus)
+- >= dzen2 0.8.5 + standard gadgets
 - mpc (an mpd client)
+- sm4tik’s icon-pack (http://dzen.geekmode.org/dwl/xbm8x8-0.1.tar.gz)
+- Standard GNU file utilities (http://www.gnu.org/software/coreutils)
+- a running NetworkManager
+- cnetworkmanager (a commandline interface for NetworkManager) (http://vidner.net/martin/software/cnetworkmanager)
 - ...
 (TODO: complete this list)
 
-Let's see how far it goes!
+Note: Some of these dependencies are just temporary. They get removed or exchanged by something better over time. Also note, that it’s an ease to remove some of the deps by changing a few lines in the code.
+
+
+== License
+
+ This program is free software; you can redistribute it and/or modify it
+ under the terms of the GNU Lesser General Public License as published by the
+ Free Software Foundation; either version 2.1 of the License, or (at
+ your option) any later version.
