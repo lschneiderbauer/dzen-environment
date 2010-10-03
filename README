@@ -18,7 +18,6 @@ $ ./wlan_networkmanager.rb
 - sm4tik’s icon-pack (http://dzen.geekmode.org/dwl/xbm8x8-0.1.tar.gz)
 - Standard GNU file utilities (http://www.gnu.org/software/coreutils)
 - a running NetworkManager
-- cnetworkmanager (a commandline interface for NetworkManager) (http://vidner.net/martin/software/cnetworkmanager)
 - ...
 (TODO: complete this list)
 
