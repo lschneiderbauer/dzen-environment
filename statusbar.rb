@@ -1,5 +1,7 @@
 #!/usr/bin/ruby
 
+require 'librmpd'
+
 ICON_BASE="/home/void/Pictures/icons"
 BAR_HEIGHT=7
 BAR_WIDTH=70
@@ -104,39 +106,33 @@ end
 
 
 class Mpd < Widget
-# TODO
-# remove mpc dependency and use mpd-lib instead
-# make use of refresh_info
 
-	def initialize(interval,interval_notav)
-		@not_av_counter = 0 	# to make less queries if not available
-		@interval_notav = interval_notav
+	def initialize
 
-		super(interval)
+		# open mpd connection and register callbacks
+		mpd = MPD.new('192.168.0.1', 6600)
+		
+		mpd.register_callback(self.method('current_song_changed'), MPD::CURRENT_SONG_CALLBACK)
+		mpd.connect true
+
+		@current_song = mpd.current_song
 	end
 
 	def name
-		"MPD"
+		"MPD Client"
 	end
 
 	def to_s
-		str = ""
-		str = `mpc -h 192.168.0.1 current 2> /dev/null` if @not_av_counter == 0
-		if str == ""
-			@not_av_counter = @interval_notav if @not_av_counter == 0
-			
-			str = "info not available"
-			@not_av_counter -= 1
-		else
-			@not_av_counter = 0
-		end
-
-		"^i(#{ICON_BASE}/note.xbm) " << str.chomp.ljust(50)
+		str = "^i(#{ICON_BASE}/note.xbm) " \
+			<< (@current_song.nil? ?  "no played song" : @current_song.title) .ljust(50)
 	end
 
-	def refresh_info
+	private
 
+	def current_song_changed (song)
+		@current_song = song
 	end
+
 end
 
 
@@ -146,7 +142,7 @@ INTERVAL=2	# in seconds
 bat=Battery.new(3)
 clock=Clock.new(1)
 cpu=Cpu.new(3)
-mpd=Mpd.new(3,30)
+mpd=Mpd.new
 
 loop do
 	puts (clock.to_s << " | " << mpd.to_s << " ^fg(grey)| ^r(600x2) |^fg() " <<
