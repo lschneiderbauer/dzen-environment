@@ -12,7 +12,6 @@ require './widgets/networkmanager'
 ICON_BASE="/home/void/Pictures/icons"
 BAR_HEIGHT=7
 BAR_WIDTH=70
-INTERVAL=2	# in seconds
 
 
 # manage script-options
@@ -21,12 +20,17 @@ options = {}
 
 # default options
 options[:screen] = 1
+options[:interval] = 2
 
 OptionParser.new do |opts|
 	opts.banner = "Usage: statusbar.rb [options]"
 
 	opts.on("-s", "--screen [SCREENNUMBER]", "Set used Xinerama-screen") do |s|
 		options[:screen] = s
+	end
+
+	opts.on("-i", "--interval [INTERVAL]", "Set interval for pushing data in seconds") do |i|
+		options[:interval] = i
 	end
 end.parse!
 
@@ -48,6 +52,7 @@ wlan=Networkmanager.new dbus
 # xrandr | grep '*'
 
 IO.popen("dzen2 -xs #{options[:screen]}","w+") do |bar|
+sleep 1 # wlan-applet should start after statusbar (to be in front)
 IO.popen("dzen2 -xs #{options[:screen]} -tw 20 -sa r -x 1380 -w #{wlan.menu_width} -l 20","w+") do |wlan_app|
 
 	loop do
@@ -57,12 +62,11 @@ IO.popen("dzen2 -xs #{options[:screen]} -tw 20 -sa r -x 1380 -w #{wlan.menu_widt
 		bar.flush
 
 		# write to wlan_app
-		p wlan.to_s
 		wlan_app.write wlan.to_s
 		wlan_app.flush
 		
 		# go to bed
-		sleep INTERVAL
+		sleep options[:interval]
 
 		trap "INT" do
 			mpd.close
