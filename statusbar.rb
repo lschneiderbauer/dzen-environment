@@ -1,5 +1,7 @@
 #!/usr/bin/ruby
 
+require 'optparse'
+
 require './widgets/clock'
 require './widgets/mpd'
 require './widgets/cpu'
@@ -11,7 +13,24 @@ BAR_WIDTH=70
 INTERVAL=2	# in seconds
 
 
+# manage script-options
+#######################################
+options = {}
+
+# default options
+options[:screen] = 1
+
+OptionParser.new do |opts|
+	opts.banner = "Usage: statusbar.rb [options]"
+
+	opts.on("-s", "--screen [SCREENNUMBER]", "Set used Xinerama-screen") do |s|
+		options[:screen] = s
+	end
+end.parse!
+
+
 # initialize widgets
+#######################################
 bat=Battery.new(3)
 clock=Clock.new(1)
 cpu=Cpu.new(3)
@@ -20,7 +39,7 @@ mpd=Mpd.new
 # get screen resolution(s)
 # xrandr | grep '*'
 
-IO.popen("dzen2","w+") do |f|
+IO.popen("dzen2 -xs #{options[:screen]}","w+") do |f|
 
 	loop do
 
