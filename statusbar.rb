@@ -110,12 +110,12 @@ class Mpd < Widget
 	def initialize
 
 		# open mpd connection and register callbacks
-		mpd = MPD.new('192.168.0.1', 6600)
+		@mpd = MPD.new('192.168.0.1', 6600)
 		
-		mpd.register_callback(self.method('current_song_changed'), MPD::CURRENT_SONG_CALLBACK)
-		mpd.connect true
+		@mpd.register_callback(self.method('current_song_changed'), MPD::CURRENT_SONG_CALLBACK)
+		@mpd.connect true
 
-		@current_song = mpd.current_song
+		@current_song = @mpd.current_song
 	end
 
 	def name
@@ -125,6 +125,10 @@ class Mpd < Widget
 	def to_s
 		str = "^i(#{ICON_BASE}/note.xbm) " \
 			<< (@current_song.nil? ?  "no played song" : @current_song.title) .ljust(50)
+	end
+
+	def close
+		@mpd.disconnect
 	end
 
 	private
@@ -149,4 +153,8 @@ loop do
 		cpu.to_s << " | " << bat.to_s)
 	STDOUT.flush
 	sleep INTERVAL
+
+	trap "INT" do
+		mpd.close
+	end
 end
