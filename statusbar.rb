@@ -124,7 +124,7 @@ class Mpd < Widget
 
 	def to_s
 		str = "^i(#{ICON_BASE}/note.xbm) " \
-			<< (@current_song.nil? ?  "no played song" : @current_song.title) .ljust(50)
+			<< (@current_song.nil? ?  "no played song" : @current_song.artist + " - " + @current_song.title) .ljust(50)
 	end
 
 	def close
