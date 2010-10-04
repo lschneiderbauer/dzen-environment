@@ -1,10 +1,6 @@
-#!/usr/bin/ruby
+require './widgets/widget'
 
-require 'dbus'
-
-ICON_BASE="/home/void/Pictures/icons"
 NM_DBUS_SERVICE="org.freedesktop.NetworkManager"
-INTERVAL=2	# in seconds
 
 class Ap
 	include Comparable
@@ -68,23 +64,29 @@ class ApManager
 
 end
 
+class Networkmanager < Widget
 
-dbus = DBus::SystemBus.instance
-man = ApManager.new dbus
-pid = 0
+	attr_reader :menu_width
 
-main = DBus::Main.new
-main << dbus
+	def initialize(dbus)
 
-loop do
+		@ap_man = ApManager.new dbus
+		@menu_width = 0
 
+	end
+
+	def name
+		"Wifi-Manager"
+	end
+
+	def to_s
 
 		width = 0
 		str = "^i(#{ICON_BASE}/wifi_02.xbm)\n"
-		man.ap_list.each do |object_path, ap|
+		@ap_man.ap_list.each do |object_path, ap|
 			
 			# active ?
-			if object_path = man.properties["ActiveAccessPoint"]
+			if object_path = @ap_man.properties["ActiveAccessPoint"]
 				color = "" ; color = "lightblue"
 				str << "^i(#{ICON_BASE}/wifi_01.xbm) " 
 			end
@@ -103,14 +105,13 @@ loop do
 			str << `echo #{ap.properties["Strength"]} | gdbar -fg 'lightblue' -bg '#494b4f' -h 7 -w 30`.chomp
 			str << "   \n"
 		
+			# measure needed width
 			tmp_width = (ap.properties["HwAddress"].size + ap.properties["Ssid"].to_s.size + 15) * 7.5
 			width = tmp_width if tmp_width > width
 		end
-		str.chomp!
-
-		# restart process
-		Process.kill("SIGTERM",pid) if pid != 0
-		pid = fork {`echo "#{str}" | dzen2 -tw 20 -x 1380 -sa r -w #{width} -l #{man.ap_list.size+1} -p`}
+		
+		@menu_width = width	
+		return str
+	end
 	
-	sleep INTERVAL	
 end

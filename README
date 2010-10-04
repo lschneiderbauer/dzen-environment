@@ -2,13 +2,11 @@
 
 This is the attempt to create a ruby-written dzen-based info-environment for the linux-desktop.
 
-There are two separate components at the moment:
 
-# Statusbar
+== How to use
+# Launch the statusbar
 $ ./statusbar.rb
 
-# NetworkManager-WLan Applet
-$ ./wlan_networkmanager.rb
 
 == Dependencies
 - >= ruby 1.8.7 (perhaps lower version)

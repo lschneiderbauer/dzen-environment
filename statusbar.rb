@@ -1,11 +1,13 @@
 #!/usr/bin/ruby
 
 require 'optparse'
+require 'dbus'
 
 require './widgets/clock'
 require './widgets/mpd'
 require './widgets/cpu'
 require './widgets/battery'
+require './widgets/networkmanager'
 
 ICON_BASE="/home/void/Pictures/icons"
 BAR_HEIGHT=7
@@ -28,24 +30,38 @@ OptionParser.new do |opts|
 	end
 end.parse!
 
+# init dbus-connection
+######################################
+dbus = DBus::SystemBus.instance
+dbus_main = DBus::Main.new
+dbus_main << dbus
 
-# initialize widgets
+# init widgets
 #######################################
-bat=Battery.new(3)
-clock=Clock.new(1)
-cpu=Cpu.new(3)
-mpd=Mpd.new(5)
+bat=Battery.new 3
+clock=Clock.new 1
+cpu=Cpu.new 3
+mpd=Mpd.new 5
+wlan=Networkmanager.new dbus
 
 # get screen resolution(s)
 # xrandr | grep '*'
 
-IO.popen("dzen2 -xs #{options[:screen]}","w+") do |f|
+IO.popen("dzen2 -xs #{options[:screen]}","w+") do |bar|
+IO.popen("dzen2 -xs #{options[:screen]} -tw 20 -sa r -x 1380 -w #{wlan.menu_width} -l 20","w+") do |wlan_app|
 
 	loop do
-
-		f.write(clock.to_s << " | " << mpd.to_s << " ^fg(grey)| ^r(600x2) |^fg() " <<
+		# write to bar
+		bar.write(clock.to_s << " | " << mpd.to_s << " ^fg(grey)| ^r(600x2) |^fg() " <<
 			cpu.to_s << " | " << bat.to_s)
-		f.flush
+		bar.flush
+
+		# write to wlan_app
+		p wlan.to_s
+		wlan_app.write wlan.to_s
+		wlan_app.flush
+		
+		# go to bed
 		sleep INTERVAL
 
 		trap "INT" do
@@ -53,4 +69,5 @@ IO.popen("dzen2 -xs #{options[:screen]}","w+") do |f|
 		end
 	end
 
+end
 end
