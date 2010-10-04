@@ -43,25 +43,24 @@ class ApManager
 		prop_if = wlan_obj["org.freedesktop.DBus.Properties"]
 
 		wlan_if.GetAccessPoints[0].each do |object_path|
-			@ap_list[object_path.to_sym] = Ap.new(dbus, object_path)
+			@ap_list[object_path] = Ap.new(dbus, object_path)
 		end
 
 		@properties = prop_if.GetAll("")[0]
 
 		# watch for ap-list updates
 		wlan_if.on_signal(dbus, "AccessPointAdded") do |object_path|
-			@ap_list[object_path.to_sym] = Ap.new(dbus, object_path)
+			@ap_list[object_path] = Ap.new(dbus, object_path)
 		end
 
 		wlan_if.on_signal(dbus, "AccessPointRemoved") do |object_path|
-			@ap_list.delete object_path.to_sym
+			@ap_list.delete object_path
 		end
 
 		wlan_if.on_signal(dbus, "PropertiesChanged") do |u|
 			@properties.merge! u
 		end
 	end
-
 end
 
 class Networkmanager < Widget
@@ -86,8 +85,9 @@ class Networkmanager < Widget
 		@ap_man.ap_list.each do |object_path, ap|
 			
 			# active ?
-			if object_path = @ap_man.properties["ActiveAccessPoint"]
-				color = "" ; color = "lightblue"
+			color = ""
+			if object_path == @ap_man.properties["ActiveAccessPoint"]
+				color = "lightblue"
 				str << "^i(#{ICON_BASE}/wifi_01.xbm) " 
 			end
 
@@ -97,16 +97,17 @@ class Networkmanager < Widget
 			end
 
 			# default-info
+			ssid = ap.properties["Ssid"].inject("") {|mem,elem| mem << elem.chr}
 			str << "^fg(#{color})" <<
-				ap.properties["HwAddress"] << " :: " <<
-				ap.properties["Ssid"].to_s << "^fg() "
+				ssid << " :: " <<
+				ap.properties["HwAddress"] << "^fg() "
 
 			# signal strength
-			str << `echo #{ap.properties["Strength"]} | gdbar -fg 'lightblue' -bg '#494b4f' -h 7 -w 30`.chomp
+			str << `echo #{ap.properties["Strength"]} | gdbar -fg 'white' -bg '#494b4f' -h 7 -w 30`.chomp
 			str << "   \n"
 		
 			# measure needed width
-			tmp_width = (ap.properties["HwAddress"].size + ap.properties["Ssid"].to_s.size + 15) * 7.5
+			tmp_width = (ap.properties["HwAddress"].size + ssid.size + 15) * 7.5
 			width = tmp_width if tmp_width > width
 		end
 		
