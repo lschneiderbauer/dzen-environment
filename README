@@ -5,7 +5,7 @@ This is the attempt to create a ruby-written dzen-based info-environment for the
 There are two separate components at the moment:
 
 # Statusbar
-$ ./statusbar.rb | dzen2
+$ ./statusbar.rb
 
 # NetworkManager-WLan Applet
 $ ./wlan_networkmanager.rb
@@ -14,12 +14,10 @@ $ ./wlan_networkmanager.rb
 - >= ruby 1.8.7 (perhaps lower version)
 - >= ruby-dbus bindings 0.4 (http://github.com/mvidner/ruby-dbus)
 - >= dzen2 0.8.5 + standard gadgets
-- mpc (an mpd client)
 - sm4tik’s icon-pack (http://dzen.geekmode.org/dwl/xbm8x8-0.1.tar.gz)
 - Standard GNU file utilities (http://www.gnu.org/software/coreutils)
-- a running NetworkManager
-- ...
-(TODO: complete this list)
+- running NetworkManager
+- running DBus
 
 Note: Some of these dependencies are just temporary. They get removed or exchanged by something better over time. Also note, that it’s an ease to remove some of the deps by changing a few lines in the code.
 
