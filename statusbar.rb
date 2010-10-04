@@ -34,7 +34,7 @@ end.parse!
 bat=Battery.new(3)
 clock=Clock.new(1)
 cpu=Cpu.new(3)
-mpd=Mpd.new
+mpd=Mpd.new(5)
 
 # get screen resolution(s)
 # xrandr | grep '*'
