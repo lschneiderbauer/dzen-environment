@@ -3,6 +3,7 @@
 require 'optparse'
 require 'dbus'
 
+require './dzen'
 require './widgets/clock'
 require './widgets/mpd'
 require './widgets/cpu'
@@ -41,7 +42,7 @@ dbus_main = DBus::Main.new
 dbus_main << dbus
 
 # init widgets
-#######################################
+######################################
 bat=Battery.new 3
 clock=Clock.new 1
 cpu=Cpu.new 3
@@ -51,27 +52,29 @@ wlan=Networkmanager.new dbus
 # get screen resolution(s)
 # xrandr | grep '*'
 
-IO.popen("dzen2 -xs #{options[:screen]}","w+") do |bar|
-sleep 1 # wlan-applet should start after statusbar (to be in front)
-IO.popen("dzen2 -xs #{options[:screen]} -tw 20 -sa r -x 1380 -w #{wlan.menu_width} -l 20","w+") do |wlan_app|
 
-	loop do
-		# write to bar
-		bar.write(clock.to_s << " | " << mpd.to_s << " ^fg(grey)| ^r(600x2) |^fg() " <<
-			cpu.to_s << " | " << bat.to_s)
-		bar.flush
+# push to dzen
+######################################
+dzen_bar = Dzen.new "-xs #{options[:screen]}"
+dzen_wlan = Dzen.new "-xs #{options[:screen]} -tw 20 -sa r -x 1380"		
+loop do
+	# write to bar
+	dzen_bar.push(clock.to_s << " | " << mpd.to_s << " ^fg(grey)| ^r(600x2) |^fg() " <<
+		cpu.to_s << " | " << bat.to_s)
+	
+	# write to wlan_app
+	dzen_wlan.push wlan.to_s
 
-		# write to wlan_app
-		wlan_app.write wlan.to_s
-		wlan_app.flush
-		
-		# go to bed
-		sleep options[:interval]
+	# go to bed
+	sleep options[:interval]
 
-		trap "INT" do
-			mpd.close
-		end
+	trap "INT" do
+		mpd.close
+		dzen_bar.close
+		dzen_wlan.close
+		break
 	end
+end
 
-end
-end
+# activate program loop
+#dbus_main.run
