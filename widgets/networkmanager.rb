@@ -65,13 +65,8 @@ end
 
 class Networkmanager < Widget
 
-	attr_reader :menu_width
-
 	def initialize(dbus)
-
 		@ap_man = ApManager.new dbus
-		@menu_width = 0
-
 	end
 
 	def name
@@ -80,7 +75,6 @@ class Networkmanager < Widget
 
 	def to_s
 
-		width = 0
 		str = "^i(#{ICON_BASE}/wifi_02.xbm)\n"
 		@ap_man.ap_list.each do |object_path, ap|
 			
@@ -105,13 +99,8 @@ class Networkmanager < Widget
 			# signal strength
 			str << `echo #{ap.properties["Strength"]} | gdbar -fg 'white' -bg '#494b4f' -h 7 -w 30`.chomp
 			str << "   \n"
-		
-			# measure needed width
-			tmp_width = (ap.properties["HwAddress"].size + ssid.size + 15) * 7.5
-			width = tmp_width if tmp_width > width
 		end
 		
-		@menu_width = width	
 		return str
 	end
 	
