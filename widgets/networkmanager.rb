@@ -101,7 +101,7 @@ class Networkmanager < Widget
 			str << "   \n"
 		end
 		
-		return str
+		return str.chomp
 	end
 	
 end

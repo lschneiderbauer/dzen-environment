@@ -60,10 +60,10 @@ dzen_wlan = Dzen.new "-xs #{options[:screen]} -tw 20 -sa r -x 1380"
 loop do
 	# write to bar
 	dzen_bar.push(clock.to_s << " | " << mpd.to_s << " ^fg(grey)| ^r(600x2) |^fg() " <<
-		cpu.to_s << " | " << bat.to_s)
+		cpu.to_s << " | " << bat.to_s << "\n")
 	
 	# write to wlan_app
-	dzen_wlan.push wlan.to_s
+	dzen_wlan.push(wlan.to_s + "\n")
 
 	# go to bed
 	sleep options[:interval]

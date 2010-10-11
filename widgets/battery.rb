@@ -16,7 +16,7 @@ class Battery < Widget
 		bat_perc = @charge_now.to_f/@charge_full*100
 
 		"^i(#{ICON_BASE}/bat_empty_01.xbm)^fg(" << ac_status_color << ")" << " (ac)^fg()" <<
-		`echo #{bat_perc} | gdbar -fg 'green' -bg '#494b4f' -h #{BAR_HEIGHT} -w #{BAR_WIDTH}`
+		`echo #{bat_perc} | gdbar -fg 'green' -bg '#494b4f' -h #{BAR_HEIGHT} -w #{BAR_WIDTH}`.chomp
 	end
 
 

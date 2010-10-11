@@ -14,7 +14,7 @@ class Dzen
 				line.size > width ? line.size : width
 			end * 3
 			)
-		@f.write(str)
+		@f.write str
 		@f.flush
 	end
 
@@ -38,10 +38,6 @@ class Dzen
 			@f = IO.popen(exec,"w")
 			@l = l
 			@menu_width = width
-
-			p exec
-			p @menu_width
-			p @l
 		end
 	end
 
