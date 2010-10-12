@@ -49,14 +49,16 @@ cpu=Cpu.new 3
 mpd=Mpd.new 5
 wlan=Networkmanager.new dbus
 
+# run dbus loop
+Thread.new { dbus_main.run }
+
 # get screen resolution(s)
 # xrandr | grep '*'
-
 
 # push to dzen
 ######################################
 dzen_bar = Dzen.new "-xs #{options[:screen]}"
-dzen_wlan = Dzen.new "-xs #{options[:screen]} -tw 20 -sa r -x 1380"		
+dzen_wlan = Dzen.new "-xs #{options[:screen]} -tw 20 -sa r -x 1380"	
 loop do
 	# write to bar
 	dzen_bar.push(clock.to_s << " | " << mpd.to_s << " ^fg(grey)| ^r(600x2) |^fg() " <<
@@ -75,6 +77,3 @@ loop do
 		break
 	end
 end
-
-# activate program loop
-#dbus_main.run
