@@ -47,10 +47,10 @@ bat=Battery.new 3
 clock=Clock.new 1
 cpu=Cpu.new 3
 mpd=Mpd.new 5
-wlan=Networkmanager.new dbus
+#wlan=Networkmanager.new dbus
 
-# run dbus loop
-Thread.new { dbus_main.run }
+# run dbus loop and restart everytime after kill
+#Thread.new { dbus_main.run }
 
 # get screen resolution(s)
 # xrandr | grep '*'
@@ -65,7 +65,7 @@ loop do
 		cpu.to_s << " | " << bat.to_s << "\n")
 	
 	# write to wlan_app
-	dzen_wlan.push(wlan.to_s + "\n")
+	#dzen_wlan.push(wlan.to_s + "\n")
 
 	# go to bed
 	sleep options[:interval]

@@ -16,7 +16,7 @@ class Ap
 		prop_if = ap_obj["org.freedesktop.DBus.Properties"]
 		
 		@properties = prop_if.GetAll("")[0]
-		
+
 		# watch for updates
 		ap_if.on_signal(dbus, "PropertiesChanged") do |u|
 			@properties.merge! u
@@ -51,13 +51,16 @@ class ApManager
 		# watch for ap-list updates
 		wlan_if.on_signal(dbus, "AccessPointAdded") do |object_path|
 			@ap_list[object_path] = Ap.new(dbus, object_path)
+			p "ap added #{@ap_list.size}"
 		end
 
 		wlan_if.on_signal(dbus, "AccessPointRemoved") do |object_path|
 			@ap_list.delete object_path
+			p "ap removed #{@ap_list.size}"
 		end
 
 		wlan_if.on_signal(dbus, "PropertiesChanged") do |u|
+			p "prop changed"
 			@properties.merge! u
 		end
 	end
