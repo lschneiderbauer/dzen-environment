@@ -9,6 +9,7 @@ require './widgets/mpd'
 require './widgets/cpu'
 require './widgets/battery'
 require './widgets/networkmanager'
+require './widgets/notification' 
 
 ICON_BASE="/home/void/Pictures/icons"
 BAR_HEIGHT=7
@@ -35,11 +36,15 @@ OptionParser.new do |opts|
 	end
 end.parse!
 
+=begin
 # init dbus-connection
 ######################################
-dbus = DBus::SystemBus.instance
+dbus_sys = DBus::SystemBus.instance
+dbus_ses = DBus::SessionBus.instance
 dbus_main = DBus::Main.new
-dbus_main << dbus
+dbus_main << dbus_sys
+dbus_main << dbus_ses
+=end
 
 # init widgets
 ######################################
@@ -47,23 +52,26 @@ bat=Battery.new 3
 clock=Clock.new 1
 cpu=Cpu.new 3
 mpd=Mpd.new 5
-#wlan=Networkmanager.new dbus
+#wlan=Networkmanager.new dbus_sys
+#notify=Notification.new dbus_ses
 
-# run dbus loop and restart everytime after kill
 #Thread.new { dbus_main.run }
-
-# get screen resolution(s)
-# xrandr | grep '*'
 
 # push to dzen
 ######################################
 dzen_bar = Dzen.new "-xs #{options[:screen]}"
-dzen_wlan = Dzen.new "-xs #{options[:screen]} -tw 20 -sa r -x 1380"	
+#dzen_wlan = Dzen.new "-xs #{options[:screen]} -tw 20 -sa r -x 1380"	
+
 loop do
 	# write to bar
-	dzen_bar.push(clock.to_s << " | " << mpd.to_s << " ^fg(grey)| ^r(600x2) |^fg() " <<
-		cpu.to_s << " | " << bat.to_s << "\n")
-	
+	dzen_bar.push(
+		clock,
+		mpd,
+		:spacer,
+		cpu,
+		bat
+	)
+
 	# write to wlan_app
 	#dzen_wlan.push(wlan.to_s + "\n")
 
@@ -73,7 +81,7 @@ loop do
 	trap "INT" do
 		mpd.close
 		dzen_bar.close
-		dzen_wlan.close
+		#dzen_wlan.close
 		break
 	end
 end
