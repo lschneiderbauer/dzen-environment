@@ -1,4 +1,4 @@
-require './widgets/widget'
+require 'widgets/widget'
 require 'librmpd'
 
 class Mpd < Widget

@@ -1,17 +1,23 @@
-#!/usr/bin/ruby
+#!/usr/bin/env ruby
+
+require 'pathname'
+
+# do some stuff to get it running from symlinks etc.
+ABS_PATH = Pathname.new(__FILE__).realpath.dirname.parent
+$LOAD_PATH << ABS_PATH + "lib/"
 
 require 'optparse'
 require 'dbus'
 
-require './dzen'
-require './widgets/clock'
-require './widgets/mpd'
-require './widgets/cpu'
-require './widgets/battery'
-require './widgets/networkmanager'
-require './widgets/notification' 
+require 'dzen'
+require 'widgets/clock'
+require 'widgets/mpd'
+require 'widgets/cpu'
+require 'widgets/battery'
+#require 'widgets/networkmanager'
+#require 'widgets/notification' 
 
-ICON_BASE="/home/void/Pictures/icons"
+ICON_BASE = ABS_PATH + "icons/"
 BAR_HEIGHT=7
 BAR_WIDTH=70
 
