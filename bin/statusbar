@@ -14,6 +14,7 @@ require 'widgets/clock'
 require 'widgets/mpd'
 require 'widgets/cpu'
 require 'widgets/battery'
+require 'widgets/kopete'
 #require 'widgets/networkmanager'
 #require 'widgets/notification' 
 
@@ -46,11 +47,11 @@ end.parse!
 # init dbus-connection
 ######################################
 dbus_sys = DBus::SystemBus.instance
+dbus_main << dbus_sys
+=end
 dbus_ses = DBus::SessionBus.instance
 dbus_main = DBus::Main.new
-dbus_main << dbus_sys
 dbus_main << dbus_ses
-=end
 
 # init widgets
 ######################################
@@ -58,10 +59,11 @@ bat=Battery.new 3
 clock=Clock.new 1
 cpu=Cpu.new 3
 mpd=Mpd.new 5
+kopete=Kopete.new(10,dbus_ses)
 #wlan=Networkmanager.new dbus_sys
 #notify=Notification.new dbus_ses
 
-#Thread.new { dbus_main.run }
+Thread.new { dbus_main.run }
 
 # push to dzen
 ######################################
@@ -75,7 +77,8 @@ loop do
 		mpd,
 		:spacer,
 		cpu,
-		bat
+		bat,
+		kopete
 	)
 
 	# write to wlan_app
