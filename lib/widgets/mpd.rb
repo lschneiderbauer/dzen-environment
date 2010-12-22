@@ -9,8 +9,11 @@ class Mpd < Widget
 		super
 
 		# first time fetch it manually
-		@current_song = @mpd.current_song if @mpd.connected?
-		@volume = @mpd.volume if @mpd.connected?
+		if @mpd.connected?
+			@state = @mpd.status
+			@current_song = @mpd.current_song
+			@volume = @mpd.volume
+		end
 	end
 
 	def name
@@ -22,7 +25,13 @@ class Mpd < Widget
 		str << (@current_song.nil? ?  \
 			"no played song" : \
 			"[^fg(orange)#{@volume}^fg()] #{@current_song.artist} - #{@current_song.title}")
-		str.ljust(90)
+
+		if @state != "play"
+			str << " [^fg(red)#{@state}^fg()]"	
+		end
+
+		#str.ljust(90)
+		return str
 	end
 
 	def close
@@ -30,6 +39,10 @@ class Mpd < Widget
 	end
 
 	private
+
+	def state_changed (state)
+		@state = state
+	end
 
 	def current_song_changed (song)
 		@current_song = song
@@ -42,6 +55,7 @@ class Mpd < Widget
 	def refresh_info
 		if @mpd.nil? || !@mpd.connected?
 			@mpd = MPD.new('192.168.0.1',6600)
+			@mpd.register_callback(self.method('state_changed'), MPD::STATE_CALLBACK)
 			@mpd.register_callback(self.method('current_song_changed'), MPD::CURRENT_SONG_CALLBACK)
 			@mpd.register_callback(self.method('volume_changed'), MPD::VOLUME_CALLBACK)
 			@mpd.connect true
