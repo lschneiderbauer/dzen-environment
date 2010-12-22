@@ -66,6 +66,7 @@ class Kopete < Widget
 				end
 
 			rescue DBus::Error
+				p "[D #{Time.now}] dbus error"
 				@kopete_obj = nil
 			end
 
@@ -80,6 +81,7 @@ class Kopete < Widget
 		else
 			@messages[props["id"]] = props["display_name"]
 		end
+		p "[D #{Time.now}] #{msg}"
 
 	end
 	
