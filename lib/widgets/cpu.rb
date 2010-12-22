@@ -11,16 +11,23 @@ class Cpu < Widget
 
 	def to_s
 
-		str = `gcpubar -c 2 -i 0.1 -fg 'blue' -bg '#494b4f' -h #{BAR_HEIGHT} -w #{BAR_WIDTH}`
-		str = str.split("\n")[1].chomp
-		str.slice!(0..4)
-		"^i(#{ICON_BASE}/fs_01.xbm) " << str
+		str = ""
+               	str << "^i(#{ICON_BASE}/fs_01.xbm)"
+	        str << `echo #{@cpu_usage} | gdbar -fg 'lightblue' -bg '#494b4f' -h #{BAR_HEIGHT} -w #{BAR_WIDTH}`.chomp
+
 	end
+
 
 	private
 
 	def refresh_info
-		
+
+		usage = 0
+		`ps -Ao pcpu`.lines do |line|
+			usage += line.to_f
+		end
+
+		@cpu_usage = usage
 	end
 
 end
