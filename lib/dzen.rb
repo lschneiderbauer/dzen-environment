@@ -8,8 +8,15 @@ class Dzen
 	def initialize(add_paras)
 		@add_paras = add_paras
 
-		# get screen width
-		@width = `xrandr | grep '*'`.split("x")[0].strip.to_i
+		# get screen width (and refresh every 30 seconds)
+		@width = 100
+		Thread.new do
+			loop do
+				@width = `xrandr | grep '*'`.split("x")[0].strip.to_i
+				sleep 30
+			end
+		end
+
 
 		refresh(0,0)
 	end

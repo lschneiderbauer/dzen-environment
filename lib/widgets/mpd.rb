@@ -27,7 +27,7 @@ class Mpd < Widget
 			"[^fg(orange)#{@volume}^fg()] #{@current_song.artist} - #{@current_song.title}")
 
 		if @state != "play"
-			str << " [^fg(red)#{@state}^fg()]"	
+			str << " [^fg(red)#{@state}^fg()]"
 		end
 
 		#str.ljust(90)
