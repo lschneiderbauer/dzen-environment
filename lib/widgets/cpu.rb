@@ -27,6 +27,8 @@ class Cpu < Widget
 			usage += line.to_f
 		end
 
+		usage = 100 if usage > 100
+
 		@cpu_usage = usage
 	end
 
